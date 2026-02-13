@@ -769,3 +769,20 @@ q14_support <- tibble(
 # PSEUDOCODE: return one-row table with model effect, assumed baseline levels, and implied total/per-capita dollar impacts.
 print_support_table("Table Q14. Implied GDP Impact for Eras Tour Host Counties", q14_support)
 # PSEUDOCODE: print final calculation table for Q14/Q15 write-up.
+
+q14_interpretation_support <- q14_support %>%
+  transmute(
+    model = "Model 5 (NAICS 71)",
+    beta_eras_tour_host = round(beta_eras_tour_host, 3),
+    implied_percent_higher_gdp_per_capita = round(percentage_increase, 2),
+    baseline_gdp_host_counties_thousand_usd = avg_naics71_gdp_host_thousand_usd,
+    implied_total_increase_thousand_usd = round(implied_total_gdp_increase_thousand_usd, 0),
+    implied_total_increase_million_usd = round(implied_total_gdp_increase_usd / 1e6, 1),
+    average_population = avg_county_population,
+    implied_per_capita_increase_usd = round(implied_per_capita_increase_usd, 2)
+  )
+# PSEUDOCODE:
+# 1) Keep only interpretation-ready fields.
+# 2) Round outputs to match write-up language (about 1.61%, 66,128 thousand USD / 66.1 million USD, and 28.75 USD per capita).
+print_support_table("Table Q14 Interpretation. Code Form of the Written Findings", q14_interpretation_support)
+# PSEUDOCODE: print concise Q14 interpretation table ready to paste into A14.
