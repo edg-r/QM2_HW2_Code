@@ -1,0 +1,46 @@
+Homework 2 Solutions:
+Shake It Off (The Budget Concerns):
+Assessing the Economic Impact of Hosting Taylor Swift’s Eras Tour
+Quantitative Methods II - Winter 2025
+February 17, 2025
+Acknowledgments
+Insert your acknowledgments here.
+3.1 Preliminaries
+Q1: How many observations and variables are in the working dataset at this point?
+A1:
+Q2: According to the U.S. Department of Agriculture’s Economic Research Service, the Rural-Urban Continuum Codes (RUCC) classify U.S. counties into nine categories based on metropolitan status, population size, and degree of urbanization. Code 1 corresponds to counties in metropolitan areas with a population of 1 million or more. How many such counties are represented in the working dataset?
+A2:
+Q3: If each row in the working dataset represents a county-level observation, and there are only a few hundred counties in U.S. metropolitan areas with populations of 1 million or more, why does the working data contain thousands of rows?
+A3:
+Q4: What do the variables 2001, 2002, up to 2023 represent in the dataset at this point?
+A4:
+3.4.4 Transforming the Outcome Variables
+Q5: In this section, we applied two transformations to the outcome variables: first, we converted GDP to per capita by dividing it by population, and second, we transformed the per capita values by taking their logarithm. Q5a: Why was it important to adjust for population size when analyzing GDP? Q5b: Based on the histograms you generated, what issue in the data prompted the need for a log transformation? Q5c: Did the log transformation resolve the issue you observed in the initial histogram of GDP per capita?
+Briefly explain your reasoning.
+A5a:
+A5b:
+A5c:
+3.5 Analyzing Time Trends in Arts, Entertainment, and Recreation Industry (NAICS 71) Annual Log GDP per Capita
+Q6: Examine the plot you generated. How does the trend in log GDP per capita for counties that hosted the Eras Tour compare to those that did not? Specifically, how do the slopes of these trends differ?
+A6:
+Q7: Why might this difference in pre-existing trends between the two groups create a problem when estimating the effect of hosting the Eras Tour on GDP?
+A7:
+3.6 Visualizing Demographic Differences Across Counties that Hosted the Eras Tour and Those That Did Not
+Q8: Examine the bar plots you generated. How do the demographic and socioeconomic characteristics of counties that hosted the Eras Tour compare to those that did not?
+Specifically, which characteristics show notable differences between the two groups?
+A8:
+Q9: Why might these differences in demographic and socioeconomic characteristics create a problem when estimating the effect of hosting the Eras Tour on GDP?
+A9:
+3.7 Multiple Regression Analyses
+Q10: Look at the coefficient for Eras Tour Host in Model 5 under NAICS 71. What does the estimate tell you about how hosting the Eras Tour affects county-level GDP per capita in the Arts, Entertainment, and Recreation industry? Is the coefficient statistically significant?
+A10:
+Q11: How does controlling for GDP per capita in 2022 in Model 5 help address the issue raised in Q7 regarding pre-existing trends? Why is this step important in reducing omitted variable bias?
+A11:
+Q12: How do the changes in the coefficient estimates for eras tour host across the models address the issue raised in Q9 regarding omitted variable bias from demographic and socioeconomic differences?
+A12:
+Q13: Examine the regression results for the other industries (NAICS 72, NAICS 54, and NAICS 11). Are the results consistent with the hypothesis that the Eras Tour had a greater economic impact on industries most likely to benefit from large events? Provide evidence from the models to support your response.
+A13:
+Q14: Based on your regression analysis for the Arts, Entertainment, and Recreation industry (NAICS 71), calculate the implied increase in GDP for counties that hosted the Eras Tour. Use the provided hints and data to guide your calculations.
+A14:
+Q15: Now, based on your calculation in Q14, what would you report to the mayor regarding the potential economic impact of hosting a Taylor Swift concert in San Diego?
+A15:

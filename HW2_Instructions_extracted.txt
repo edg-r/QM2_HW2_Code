@@ -1,0 +1,518 @@
+
+
+===== PAGE 1 =====
+Shake It Off (The Budget Concerns) :
+Assessing the Economic Impact of Hosting Taylor Swift’s Eras Tour
+GPCO 454 - Quantitative Methods II - Homework 2
+You’ve been working in the San Diego Mayor’s Office, specifically in the Economic Plan-
+ning Department, for a few months now. The work is meaningful, but some days feel long
+and routine. However, today is not one of those days. It started with a simple rumor,
+overheard while grabbing your morning coffee: Taylor Swift might be planning another
+concert tour within the next two years. As a die-hard Swiftie (though you’d never openly
+admit it at work), your mind immediately races. Could San Diego become one of the
+stops on her next tour?
+You’re already daydreaming about screaming along to All Too Well (10-Minute Version)
+when a thought hits you—this could be big for the city. Her recent Eras Tour set economic
+records, reportedly boosting local economies in each city she visited by millions of dollars.1
+The streets were packed with tourists, hotels sold out, and restaurants had wait times
+that stretched for hours. Could a Taylor Swift concert be just what San Diego’s economy
+needs to drive growth and recovery after the challenges of recent years?
+With renewed purpose, you pitch the idea to the mayor and the senior planning team
+at the next brainstorming session. You outline how the Eras Tour brought a surge in
+tourism, increased local business revenue, and generated tax dollars for other cities. The
+mayor listens but is skeptical. “Look,” he says, “it’s an intriguing idea, but you need to
+understand that hosting an event of this magnitude isn’t cheap. We’d be talking about
+significant investments—venue security, public transportation upgrades, and permits, to
+name a few. And frankly, with urgent issues like wildfire recovery and homelessness on
+our plate, I can’t justify allocating funds unless you can prove that hosting this concert
+will have a substantial economic impact.”
+Challenge accepted. You leave the meeting determined to make your case. To convince
+the mayor, you’ll need more than anecdotes. You’ll gather data on past concerts and
+apply multiple regression analysis to examine how major events impact local economies.
+Your task is to assess whether hosting concerts boosts the local economy. The fate of
+San Diego’s potential Taylor Swift concert now rests in your hands. Can you prove it’s
+more than just a fan’s dream but an economic win for the city?
+1See this, this, and this article, for example.
+1
+
+===== PAGE 2 =====
+1 General Instructions
+This homework is designed to help you apply concepts and tools to a real-world policy
+question. Your goal is to use data and multiple regression to analyze how hosting Taylor
+Swift’s Eras Tour impacted the local (county-level) economy.
+Here are a few key points to keep in mind:
+1. Focus on Clarity and Interpretation : The primary objective is to interpret the
+results of your analysis in the context of the policy question. Explain your findings clearly
+and concisely.
+2. Follow Best Practices in R: Use the coding techniques from lab sessions to manage
+data, run regressions, and produce clear outputs.
+3. Submission Format: Submit two files electronically through Canvas:
+• A PDF document ( LastName PID HW2.pdf) containing your answers to all ques-
+tions, including any written explanations, tables, and figures.
+• A clearly labeled R script ( LastName PID HW2.R) that contains all the code used to
+load data, run analyses, and generate figures and tables.
+Both files must be well-organized, and your R script should run without errors. Assume
+the grader will download the script into the same directory as the data file. Your R script
+needs to run as a standalone file. Once complete, test your script by running it all the
+way through to ensure it works from start to finish without any pauses or interruptions.
+4. Collaboration Policy: You may collaborate with others but must acknowledge all
+collaborators and tools. If you used AI tools like ChatGPT, specify how they were used.
+Example Acknowledgment (to be included at the beginning of your PDF
+submission):
+ACKNOWLEDGMENTS: I, Alexander J. Norling, acknowledge working
+with John Doe and Jane Smith. I also used ChatGPT for help with data
+manipulation and improving plot aesthetics. All analyses and conclusions are
+my own.
+5. Late Submissions : Late submissions will not be graded. Ensure that your files
+are submitted on time; the timestamp on the Canvas server will be used to determine
+timeliness.
+6. Ask for Help : If you encounter any difficulties, don’t hesitate to reach out during
+office hours or review sessions.
+2
+
+===== PAGE 3 =====
+2 About the Data
+For this assignment, you will work with three separate datasets:
+• County-level Annual GDP (2001-2023): Provided by the Bureau of Economic
+Analysis (BEA) Interactive Data Application. The dataset is contained in the file
+HW2 CAGDP2 ALL AREAS 2001 2023.xlsx.
+• Taylor Swift’s Eras Tour: A dataset with information on the locations and dates
+of all U.S. tour stops, compiled by a dedicated Swiftie from an online forum. The
+dataset is contained in the file HW2 The Eras Tour US Schedule.xlsx.
+• County Demographics and Socioeconomic Indicators: Provided by the USDA
+Economic Research Service, derived from the Small Area Income and Poverty Es-
+timates (SAIPE) Program. Data includes the 2023 Rural-Urban Continuum Code,
+population estimates, net migration, education attainment levels, and poverty rates.
+The dataset is contained in the file HW2 County Demographics.xlsx.
+Details on variable names can be found in the accompanying codebooks, footnotes, and
+descriptions. These documents are provided in the following files:
+• HW2 Industry Category and Description.pdf
+• HW2 CAGDP2 Footnotes.pdf
+• HW2 CAGDP2 ALL AREAS 2001 2023.xlsx
+• HW2 County Demographics.xlsx
+• HW2 The Eras Tour US Schedule.xlsx
+Now is a good time to check all the files provided for this assignment. The Excel files
+contain multiple sheets, including codebooks and footnotes that explain key variables,
+definitions, and data formats. In practice, data in large projects is often presented in
+a similarly complex and detailed manner. While this may seem daunting at first, these
+documents are actually very helpful for ensuring your analysis is accurate. It’s crucial
+to spend time understanding them to avoid errors. Open the datasets to get a sense of
+what’s inside—variable names, data types, and any missing or special values. Remember,
+you cannot blindly proceed with your regression analysis without first comprehending the
+structure and content of your data.
+3
+
+===== PAGE 4 =====
+3 Your Tasks
+1. R Script. Your R script should thoroughly address each and every numbered
+list outlined in the tasks below. Document the steps you take in your script with mean-
+ingful comments that explain your code and provide context for each step. The goal
+is to ensure that someone with a reasonable understanding of R can follow your logic,
+understand how you implemented each task, and verify your results. Pay special at-
+tention to covering all aspects of the task instructions to demonstrate mastery of the
+concepts. Save your script as LastName PID HW2.R (e.g., Ravanilla A12345678 HW2.R).
+Ensure there are no spaces in the filename.
+2. PDF Submission. Your PDF submission should clearly and concisely answer all
+questions (e.g., Q1, Q2, etc.) listed under each section. Organize your answers logi-
+cally and ensure that any figures or tables generated as part of your analysis are prop-
+erly labeled, referenced, and explained. Save your PDF as LastName PID HW2.pdf (e.g.,
+Ravanilla A12345678 HW2.pdf). Ensure there are no spaces in the filename.
+4
+
+===== PAGE 5 =====
+3.1 Preliminaries
+1. Set your working directory and load all necessary packages in your R script. IM-
+PORTANT: Comment out the setwd() command with a # before submitting
+your R script to save time when we run and check your script.
+2. Load the following datasets into R:
+(1) HW2 CAGDP2 ALL AREAS 2001 2023.xlsx,
+(2) HW2 The Eras Tour US Schedule.xlsx, and
+(3) HW2 County Demographics.xlsx.
+Assign these datasets to variables calledcagdp data, eras data, and controls data,
+respectively.
+3. Merge controls data into cagdp data. Name the resulting dataset merged data.
+4. Remove the variable GeoName.y from merged data and rename GeoName.x to GeoName,
+since these are duplicate variables. Verify that the merge was successful by checking
+the structure of merged data.
+5. Filter merged data to include only cases whereRural Urban Continuum Code 2023
+equals 1. This will restrict the data to the most urban, metro areas with 1 million
+or more residents. Name this filtered dataset filtered data.
+6. Remove the variable Rural Urban Continuum Code 2023 from filtered data to
+keep the dataset tidy.
+7. Merge eras data into filtered data. Name the resulting dataset working data.
+8. Check the dimension of working data.
+9. Count the unique number of observations in the GeoName variable.
+Q1: How many observations and variables are in the working dataset?
+Q2: According to the U.S. Department of Agriculture’s Economic Research Service, the
+Rural-Urban Continuum Codes (RUCC) classify U.S. counties into nine categories based
+on metropolitan status, population size, and degree of urbanization. Code 1 corresponds
+to counties in metropolitan areas with a population of 1 million or more. How many such
+counties are represented in the data?
+Q3: If each row in the dataset represents a county-level observation, and there are only
+a few hundred counties in U.S. metropolitan areas with populations of 1 million or more,
+why does the working data contain thousands of rows?
+Q4: What do the variables 2001, 2002, up to 2023 represent in the working dataset at
+this point?
+5
+
+===== PAGE 6 =====
+3.2 Data Cleaning: Dependent Variables
+1. Identify all variables from 2001 to 2023 that contain county-level GDP data. You
+may want to store these variable names in a vector for easier processing.
+Hint: You can create this vector programmatically using
+year columns <- as.character(2001:2023) . This converts the sequence of years
+from 2001 to 2023 into character strings that match the column names in your
+dataset. Having these stored in a vector will make it easier to apply transformations
+across multiple columns.
+2. Replace all occurrences of the value (D) with NA.
+Hint: You can use mutate() along with across() to apply a function to multiple
+columns at once. For example, you may want to use:
+mutate(across(all_of(year_columns), ~ ifelse(.x == "(D)", NA, .x)))
+3. Convert these variables to numeric data type after replacing (D) with NA.
+3.3 Variable Creation: Hosting an Eras Tour Concert (Binary
+Indicator)
+1. Create a new binary variable, eras tour host, that indicates whether a county
+hosted an Eras Tour concert in 2023. This variable should be equal to 1 if the
+county had at least one concert in 2023, and 0 otherwise.
+6
+
+===== PAGE 7 =====
+3.4 Understanding the Outcome Variables
+Large-scale events like the Eras Tour have the potential to impact local economies in
+direct and indirect ways. The North American Industry Classification System (NAICS)
+– represented by the variable IndustryClassification – helps categorize industries
+based on their primary activities, providing a detailed structure for economic analysis.
+In this section, we focus on which industries, based on their NAICS classifications, are
+most, moderately, and least likely to experience significant changes when a county hosts
+a major event. (Note: Sections 3.4.1 to 3.4.3 contain no tasks. They are provided for
+your reference only. Tasks begin in Section 3.4.4.)
+3.4.1 Industries Most Likely to Be Impacted
+• Arts, Entertainment, and Recreation (NAICS 71) :
+This includes concert venues, sports arenas, and entertainment services, which di-
+rectly benefit from increased ticket sales and event participation.
+• Accommodation and Food Services (NAICS 72) :
+Hotels, restaurants, and catering services often experience increased demand as
+attendees book accommodations and dine out during their visit.
+3.4.2 Industries Moderately Likely to Be Impacted
+• Professional, Scientific, and Technical Services (NAICS 54) :
+Event-related needs such as management, marketing, event planning, and techni-
+cal support may increase temporarily but are less dependent on direct consumer
+activity.
+3.4.3 Industries Least Likely to Be Impacted
+• Agriculture, Forestry, Fishing, and Hunting (NAICS 11) :
+Events like the Eras Tour are unlikely to have any meaningful impact on agricultural
+production or services.
+7
+
+===== PAGE 8 =====
+3.4.4 Transforming the Outcome Variables
+1. Convert all GDP variables from 2001 to 2023 to per capita values. NOTE: Round
+the resulting values to two decimal places to improve readability.
+2. Filter the dataset to include only rows where IndustryClassification == 71 ,
+narrowing the analysis to the Arts, Entertainment, and Recreation industry. This
+industry is expected to experience some of the most significant impacts from hosting
+large-scale events such as the Eras Tour.
+3. Create a histogram to visualize the distribution of county-level GDP per capita for
+this industry in 2023. NOTE: Set binwidth = 0.5. Save it as an image file. item
+4. Transform the GDP variables from 2001 to 2023, which are already in per capita
+terms, into the log of (1 + thousand USD per capita) values.
+5. Filter once again the dataset to include only rows for the Arts, Entertainment, and
+Recreation industry (NAICS 71), and then generate a histogram of the transformed
+variable, log of 2023 county-level GDP per capita in this industry. NOTE: Set
+binwidth = 0.5. Save it as an image file.
+Q5: In this section, we applied two transformations to the outcome variables: first, we
+converted GDP to per capita by dividing it by population, and second, we transformed
+the per capita values by taking their logarithm. Q5a:Why was it important to adjust
+for population size when analyzing GDP? Q5b: Based on the histograms you generated,
+what issue in the data prompted the need for a log transformation? Q5c: Did the log
+transformation resolve the issue you observed in the initial histogram of GDP per capita?
+Briefly explain your reasoning.
+8
+
+===== PAGE 9 =====
+3.5 Analyzing Time Trends in Arts, Entertainment, and Recre-
+ation Industry (NAICS 71) Annual Log GDP per Capita
+In this section, you will create a plot to visualize the differences in economic activity (in
+log-transformed GDP per capita) between counties that hosted the Eras Tour and those
+that did not, across the years for which data is available.
+1. Filter the data: Subset the dataset to include only rows whereIndustryClassification
+== 71 . This focuses your analysis on the Arts, Entertainment, and Recreation in-
+dustry.
+2. Prepare the data for visualization: Transform the data to a long format with
+years from 2001 to 2023 as a single variable. Then, calculate theaverage log GDP
+per capita for each year, grouped by the variable eras tour host.
+3. Convert the Year variable to a numeric type to ensure proper ordering along the
+x-axis.
+4. Create the plot: Generate a line plot with ggplot2. Use years (2001–2023) on the
+x-axis and the average log GDP per capita on the y-axis. Ensure the plot includes:
+• A title describing the trend comparison across both groups.
+• All years displayed on the x-axis without scientific notation.
+• A legend identifying each group (eras tour host = 1 for counties that hosted
+the Eras Tour, and eras tour host = 0 for those that did not).
+5. Save your plot: Export the plot as an image file (e.g., PNG) to include in your
+final report. Use a descriptive file name such as naics 71 log gdp plot.png.
+Q6: Examine the plot you generated. How does the trend in log GDP per capita for
+counties that hosted the Eras Tour compare to those that did not? Specifically, how do
+the slopes of these trends differ?
+Q7: Why might this difference in pre-existing trends between the two groups create a
+problem when estimating the effect of hosting the Eras Tour on GDP?
+9
+
+===== PAGE 10 =====
+3.6 Visualizing Demographic Differences Across Counties that
+Hosted the Eras Tour and Those That Did Not
+In this section, you will create a series of bar plots to visualize key demographic and
+socioeconomic differences between counties that hosted the Eras Tour and those that did
+not. Specifically, you will analyze the following characteristics:
+• Educational attainment shares:
+– Less than a high school diploma (2018–22)
+– High school diploma only (2018–22)
+– Some college or associate degree (2018–22)
+– Bachelor’s degree or higher (2018–22)
+• Poverty rate (2021)
+• Net migration rate (2023)
+To compare these characteristics, you will create bar plots. The treatment group (eras tour host
+= 1 ) will display 95% confidence intervals (CIs), while the control group (eras tour host
+= 0 ) will not. To simplify the process, the necessary R code to generate these plots is
+provided below. You can simply copy and run the code in your R script.
+1. Install and Load Necessary Packages
+To proceed, you need the patchwork library to combine multiple plots into a panel
+layout. If you haven’t installed it yet, use the following code:
+1 # Install pa tc hw or k if not already i ns ta ll ed
+2 install . packages ( " pa tc hw or k " )
+3
+4 # Load required li br ar ie s
+5 library ( ti dy ve rs e )
+6 library ( pa tc hw or k )
+10
+
+===== PAGE 11 =====
+2. Prepare Population Characteristics for Visualization
+Calculate the share of the population by education level, along with poverty and
+migration rates:
+1 # Define the share of the p o p u l a t i o n by e d u c a t i o n a l
+a t t a i n m e n t
+2 r e g r e s s i o n _ data <- working _ data % >%
+3 mutate (
+4 Less _ than _ HS _ Share = ( ‘ Less than a high school diploma ,
+2018 -22 ‘ / POP _ ESTIMATE _ 2023) * 100 ,
+5 HS _ Only _ Share = ( ‘ High school diploma only , 2018 -22 ‘ /
+POP _ ESTIMATE _ 2023) * 100 ,
+6 Some _ College _ Share = ( ‘ Some college or as so ci at e ’s degree
+, 2018 -22 ‘ / POP _ ESTIMATE _ 2023) * 100 ,
+7 Ba ch el or s _ or _ Higher _ Share = ( ‘ Bachelor ’s degree or higher
+, 2018 -22 ‘ / POP _ ESTIMATE _ 2023) * 100
+8 )
+11
+
+===== PAGE 12 =====
+3. Summarize Data by Treatment Group
+Summarize the data by eras tour host, calculating 95% CIs only for the treatment
+group:
+1 # Su mm ar iz e data by eras _ tour _ host
+2 summary _ with _ ci <- r e g r e s s i o n _ data % >%
+3 group _ by ( eras _ tour _ host ) % >%
+4 s um ma ri ze (
+5 Less _ than _ HS = mean ( Less _ than _ HS _ Share , na . rm = TRUE ) ,
+6 Less _ than _ HS _ CI = ifelse ( eras _ tour _ host == 1 , 1.96 * sd (
+Less _ than _ HS _ Share , na . rm = TRUE ) / sqrt ( n () ) , NA ) ,
+7
+8 HS _ Only = mean ( HS _ Only _ Share , na . rm = TRUE ) ,
+9 HS _ Only _ CI = ifelse ( eras _ tour _ host == 1 , 1.96 * sd ( HS _
+Only _ Share , na . rm = TRUE ) / sqrt ( n () ) , NA ) ,
+10
+11 Some _ College = mean ( Some _ College _ Share , na . rm = TRUE ) ,
+12 Some _ College _ CI = ifelse ( eras _ tour _ host == 1 , 1.96 * sd (
+Some _ College _ Share , na . rm = TRUE ) / sqrt ( n () ) , NA ) ,
+13
+14 Ba ch el or s _ Higher = mean ( B ac he lo rs _ or _ Higher _ Share , na . rm
+= TRUE ) ,
+15 Ba ch el or s _ Higher _ CI = ifelse ( eras _ tour _ host == 1 , 1.96 *
+sd ( B ac he lo rs _ or _ Higher _ Share , na . rm = TRUE ) / sqrt ( n ()
+) , NA ) ,
+16
+17 Poverty = mean ( PC TP OV AL L _ 2021 , na . rm = TRUE ) ,
+18 Poverty _ CI = ifelse ( eras _ tour _ host == 1 , 1.96 * sd (
+P CT PO VA LL _ 2021 , na . rm = TRUE ) / sqrt ( n () ) , NA ) ,
+19
+20 Net _ Mi gr at io n = mean ( NET _ MIG _ 2023 , na . rm = TRUE ) ,
+21 Net _ Mi gr at io n _ CI = ifelse ( eras _ tour _ host == 1 , 1.96 * sd (
+NET _ MIG _ 2023 , na . rm = TRUE ) / sqrt ( n () ) , NA ) ,
+22 . groups = " drop "
+23 )
+12
+
+===== PAGE 13 =====
+4. Generate and Save the Bar Plots
+Use a function to create individual bar plots with 95% CIs for the treatment group:
+1 # Function to create bar plots with 95% CI
+2 plot _ bar _ with _ ci <- function ( variable , ci _ variable , title , y _
+label ) {
+3 plot _ data <- summary _ with _ ci % >%
+4 filter ( ! is . na (. data [[ variable ]]) )
+5
+6 ggplot ( plot _ data , aes ( x = as . factor ( eras _ tour _ host ) , y = .
+data [[ variable ]] , fill = as . factor ( eras _ tour _ host ) ) ) +
+7 geom _ bar ( stat = " identity " , position = " dodge " , width =
+0.7) +
+8 geom _ errorbar (
+9 aes ( ymin = . data [[ variable ]] - . data [[ ci _ variable ]] ,
+ymax = . data [[ variable ]] + . data [[ ci _ variable ]]) ,
+10 width = 0.2 ,
+11 data = filter ( plot _ data , eras _ tour _ host == 1)
+12 ) +
+13 labs ( title = title , x = " Eras Tour Host " , y = y _ label ,
+fill = " Eras Tour Host " ) +
+14 theme _ minimal () +
+15 theme ( plot . title = element _ text ( size = 10) , axis . text . x =
+element _ text ( angle = 45 , hjust = 1) )
+16 }
+17
+18 # Generate plots for each c h a r a c t e r i s t i c
+19 plot1 <- plot _ bar _ with _ ci ( " Less _ than _ HS " , " Less _ than _ HS _ CI " ,
+" Less than High School Diploma " , " P e r c e n t a g e (%) " )
+20 plot2 <- plot _ bar _ with _ ci ( " HS _ Only " , " HS _ Only _ CI " , " High
+School Diploma Only " , " P e r c e n t a g e (%) " )
+21 plot3 <- plot _ bar _ with _ ci ( " Some _ College " , " Some _ College _ CI " ,
+" Some College or A ss oc ia te Degree " , " P e r c e n t a g e (%) " )
+22 plot4 <- plot _ bar _ with _ ci ( " Ba c he lo rs _ Higher " , " B ac he lo rs _
+Higher _ CI " , " Bachelor ’ s Degree or Higher " , " P e r c e n t a g e (%)
+" )
+23 plot5 <- plot _ bar _ with _ ci ( " Poverty " , " Poverty _ CI " , " Poverty
+Rate (2021) " , " P e r c e n t a g e (%) " )
+24 plot6 <- plot _ bar _ with _ ci ( " Net _ M ig ra ti on " , " Net _ M ig ra ti on _ CI "
+, " Net Mi gr at io n (2023) " , " Net Mi gr at io n Rate " )
+25
+26 # Arrange all plots in a 3 x2 panel and display
+13
+
+===== PAGE 14 =====
+27 final _ panel <- ( plot1 | plot2 ) / ( plot3 | plot4 ) / ( plot5 |
+plot6 )
+28 print ( final _ panel )
+29
+30 # Save the final plot as an image file
+31 ggsave ( " d e m o g r a p h i c s _ c o m p a r i s o n _ panel . png " , plot = final _
+panel , width = 12 , height = 10 , dpi = 300)
+Q8: Examine the bar plots you generated. How do the demographic and socioeconomic
+characteristics of counties that hosted the Eras Tour compare to those that did not?
+Specifically, which characteristics show notable differences between the two groups?
+Q9: Why might these differences in demographic and socioeconomic characteristics be-
+tween the two groups create a problem when estimating the effect of hosting the Eras
+Tour on GDP?
+14
+
+===== PAGE 15 =====
+3.7 Multiple Regression Analyses
+3.7.1 Multiple Regression Analyses: Industries Most Likely to Be Impacted
+(NAICS 71)
+In this section, you will perform a series of multiple regression analyses to examine the
+impact of hosting the Eras Tour on log GDP per capita in the Arts, Entertainment, and
+Recreation industry (NAICS 71). The goal is to progressively add control variables to
+understand how these factors affect the estimated relationship between hosting the Eras
+Tour and economic outcomes.
+1. Filter the data: Subset the dataset to include only rows where theIndustryClassification
+corresponds to NAICS 71.
+2. Prepare relevant variables: Create variables representing the share of educa-
+tional attainment levels, poverty rate, and net migration rate. These will serve as
+control variables in your regression models.
+Hint: Use mutate() to calculate the percentage shares and select only relevant
+variables for your analysis.
+3. Define regression models: You will define five models with progressively added
+controls. Start with a simple regression of log GDP per capita for 2023 on the treat-
+ment variable ( eras tour host). Add educational attainment (various shares),
+poverty, net migration, and GDP for 2022 as controls in subsequent models.
+4. Generate the regression table: Summarize the results of all five models in a
+single table. The dependent variable for all models is log GDP per capita in 2023.
+3.7.2 Multiple Regression Analyses: Industries Most Likely to Be Impacted
+(NAICS 72)
+In this section, you will perform multiple regression analyses for the Accommodation and
+Food Services industry (NAICS 72). Repeat the process you followed in the previous sec-
+tion, but this time, filter the dataset to include only rows where theIndustryClassification
+corresponds to NAICS 72.
+1. Filter the data: Subset the dataset to include only rows for NAICS 72.
+2. Prepare relevant variables: Calculate the control variables as you did for NAICS
+71, including educational attainment shares, poverty rate, and net migration rate.
+3. Define regression models: Run a series of regression models with progressively
+added controls. Use log GDP per capita for 2023 as the dependent variable.
+15
+
+===== PAGE 16 =====
+4. Generate the regression table: Summarize the results of all models in a table
+similar to the one you generated for NAICS 71.
+Hint: You can reuse most of the R code from the previous section by adjusting the
+IndustryClassification filter to NAICS 72.
+3.7.3 Multiple Regression Analyses: Industries Moderately Likely to Be Im-
+pacted (NAICS 54)
+In this section, you will conduct multiple regression analyses for the Professional, Scien-
+tific, and Technical Services industry (NAICS 54). Repeat the steps from the previous
+section, adjusting the dataset to include only rows where the IndustryClassification
+corresponds to NAICS 54.
+1. Filter the data: Subset the dataset to include only rows for NAICS 54.
+2. Prepare relevant variables: Generate the control variables such as educational
+attainment shares, poverty rate, and net migration rate.
+3. Define regression models: Perform a series of regressions using log GDP per
+capita for 2023 as the dependent variable. Add controls progressively across models.
+4. Generate the regression table: Summarize the results for all models in a table,
+similar to the one produced in earlier sections.
+Hint: You can use the same code structure from the previous sections, making sure to
+update the filter to IndustryClassification == 54 .
+3.7.4 Multiple Regression Analyses: Industries Least Likely to Be Impacted
+(NAICS 11)
+In this section, you will conduct multiple regression analyses for theAgriculture, Forestry,
+Fishing, and Hunting industry (NAICS 11). Follow the process outlined in the previous
+sections, filtering the dataset for NAICS 11.
+1. Filter the data: Subset the dataset to include only rows for NAICS 11.
+2. Prepare relevant variables: Generate control variables such as educational at-
+tainment shares, poverty rate, and net migration rate.
+3. Define regression models: Perform a series of regressions with log GDP per
+capita for 2023 as the dependent variable. Progressively add controls in each model.
+4. Generate the regression table: Summarize the results for all models in a table,
+following the format used in earlier sections.
+16
+
+===== PAGE 17 =====
+Q10: Look at the coefficient for Eras Tour Host in Model 5 under NAICS 71. What
+does the estimate tell you about how hosting the Eras Tour affects county-level GDP per
+capita in the Arts, Entertainment, and Recreation industry? Is the coefficient statistically
+significant?
+Q11: How does controlling for GDP per capita in 2022 in Model 5 help address the
+issue raised in Q7 regarding pre-existing trends? Why is this step important in reducing
+omitted variable bias?
+Q12: How do the changes in the coefficient estimates for eras tour host across the
+models address the issue raised in Q9 regarding omitted variable bias from demographic
+and socioeconomic differences?
+Q13: Examine the regression results for the other industries (NAICS 72, NAICS 54, and
+NAICS 11). Are the results consistent with the hypothesis that the Eras Tour had a
+greater economic impact on industries most likely to benefit from large events? Provide
+evidence from the models to support your response.
+Q14: Based on your regression analysis for the Arts, Entertainment, and Recreation
+industry (NAICS 71), calculate the implied increase in GDP for counties that hosted the
+Eras Tour. Use the provided hints and data to guide your calculations.
+Hint 1: Refer to the coefficient for Eras Tour Host in Model 5 under NAICS 71. Since
+the outcome is in log GDP per capita, follow these steps:
+1. Exponentiate the coefficient: Convert the log effect to a proportional change.
+2. Find the percentage increase : Subtract 1 from the exponentiated value and
+multiply by 100.
+3. Calculate the estimated increase in thousand USD : Multiply the percent-
+age increase by the average NAICS 71 GDP in host counties, which is 4,100,000
+thousand USD.
+4. Calculate the per capita dollar impact : Use the average county population of
+2,300,000 to estimate the economic boost per capita.
+Q15: Now, based on your calculation in Q14, what would you report to the mayor
+regarding the potential economic impact of hosting a Taylor Swift concert in San Diego?
+Provide a structured response that addresses the following points:
+1. Evidence of economic impact : Summarize the key findings from the regression
+analysis, including the size and statistical significance of the effect.
+2. Estimated economic benefit : Report the dollar increase in county-level GDP
+per capita and total GDP implied by the model.
+17
+
+===== PAGE 18 =====
+3. Strength of the argument : Explain how controlling for education, poverty, mi-
+gration, and prior GDP helps provide a more credible estimate of the impact, re-
+ducing concerns about omitted variable bias.
+4. Relevance to San Diego : Discuss how these findings support the idea that a
+major event could boost the local economy and provide a rationale for investing in
+hosting the concert mindful of the cost.
+18
