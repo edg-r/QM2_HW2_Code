@@ -139,6 +139,31 @@ working_data <- working_data %>%
 # Section 3.4.4 - Transforming the Outcome Variables
 # --------------------------------------------------
 
+# Figure footnotes (embedded in exported images via plot captions).
+figure_footnote_1 <- str_wrap(
+  "Figure 1 shows the distribution of 2023 NAICS 71 GDP per capita across metropolitan counties. The histogram indicates most counties are concentrated at lower-to-moderate values, with a smaller right tail at higher GDP per-capita levels.",
+  width = 120
+)
+figure_footnote_2 <- str_wrap(
+  "Figure 2 shows the distribution of log(1 + 2023 NAICS 71 GDP per capita). The log transform compresses the right tail, yielding a less skewed distribution that is more suitable for linear regression analysis.",
+  width = 120
+)
+figure_footnote_3 <- str_wrap(
+  "Figure 3 shows average log GDP per capita trends from 2001-2023 for Eras Tour host and non-host counties in NAICS 71. Host counties remain above non-host counties over time, and both groups show upward long-run trends.",
+  width = 140
+)
+figure_footnote_4 <- str_wrap(
+  "Figure 4 compares demographic and socioeconomic averages between Eras Tour host and non-host counties, with treated-group confidence intervals shown for each metric.",
+  width = 140
+)
+
+# Shared caption styling so all footnotes are italic and visible in saved PNGs.
+footnote_caption_theme <- theme(
+  plot.caption = element_text(face = "italic", hjust = 0, size = 9, margin = margin(t = 10)),
+  plot.margin = margin(t = 5.5, r = 5.5, b = 16, l = 5.5)
+)
+# PSEUDOCODE: define one reusable italic caption style for all exported figures.
+
 # 1. Transform GDP variables to per capita values
 # GDP values are in thousands of USD; divide by population to get per capita
 
@@ -161,9 +186,11 @@ histogram_pc <- ggplot(naics_71_data, aes(x = `2023`)) +
   geom_histogram(binwidth = 0.5, fill = "steelblue", color = "black") +
   labs(title = "Distribution of 2023 GDP Per Capita (NAICS 71)",
        x = "GDP Per Capita (Thousands USD)",
-       y = "Number of Counties") +
+       y = "Number of Counties",
+       caption = figure_footnote_1) +
   scale_y_continuous(breaks = scales::breaks_pretty(n = 12)) +
-  theme_minimal()
+  theme_minimal() +
+  footnote_caption_theme
 # PSEUDOCODE: create histogram object of 2023 NAICS 71 per-capita GDP.
 
 # Display the plot in the current R session for visual QA.
@@ -193,9 +220,11 @@ histogram_log <- ggplot(naics_71_log_data, aes(x = `2023`)) +
   geom_histogram(binwidth = 0.5, fill = "steelblue", color = "black") +
   labs(title = "Distribution of Log(1 + GDP Per Capita) in 2023 (NAICS 71)",
        x = "Log(1 + GDP Per Capita in Thousands USD)",
-       y = "Number of Counties") +
+       y = "Number of Counties",
+       caption = figure_footnote_2) +
   scale_y_continuous(breaks = scales::breaks_pretty(n = 12)) +
-  theme_minimal()
+  theme_minimal() +
+  footnote_caption_theme
 # PSEUDOCODE: create histogram object of logged 2023 NAICS 71 per-capita GDP.
 
 # Display transformed histogram for quick visual verification.
@@ -244,10 +273,12 @@ trends_plot <- ggplot(trends_long, aes(x = Year, y = avg_log_gdp_pc,
   labs(title = "Average Log GDP Per Capita (NAICS 71): Eras Tour Host vs Non-Host Counties",
        x = "Year",
        y = "Average Log GDP Per Capita",
-       color = "Eras Tour Host") +
+       color = "Eras Tour Host",
+       caption = figure_footnote_3) +
   scale_x_continuous(breaks = 2001:2023, labels = 2001:2023) +
   scale_y_continuous(breaks = scales::breaks_pretty(n = 12)) +
   theme_minimal() +
+  footnote_caption_theme +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 # PSEUDOCODE: build line plot comparing average log GDP trends for host vs non-host counties.
 
@@ -348,7 +379,13 @@ plot6 <- plot_bar_with_ci("Net_Migration", "Net_Migration_CI", "Net Migration (2
 
 # Arrange all plots in a 3x2 panel and display
 # Combine six charts into a 3x2 layout for side-by-side interpretation.
-final_panel <- (plot1 | plot2) / (plot3 | plot4) / (plot5 | plot6)
+final_panel <- ((plot1 | plot2) / (plot3 | plot4) / (plot5 | plot6)) +
+  plot_annotation(
+    caption = figure_footnote_4,
+    theme = theme(
+      plot.caption = element_text(face = "italic", hjust = 0, size = 9, margin = margin(t = 10))
+    )
+  )
 # PSEUDOCODE: arrange six plots into a 3-rows-by-2-columns panel.
 
 # Show the combined panel in the plotting device.
