@@ -7,10 +7,7 @@
 # ---------------------------
 
 # 1. Set your working directory and load the necessary packages in your R script.
-# Point R to the homework folder so all file reads/writes use local relative paths.
 # setwd("/Users/edgar/Documents/01 Projects/GPCO 454 - QM2 - Ravanilla/HomeWork/HW2")
-# PSEUDOCODE: optionally set current folder to the HW2 project path (leave commented for submission).
-# Confirm that the working directory was set correctly before loading data.
 getwd()
 # PSEUDOCODE: print current folder path to verify setwd worked.
 if (!file.exists("HW2_CAGDP2_ALL_AREAS_2001_2023.xlsx")) stop("Run this script from the HW2 folder, or set the working directory first.")
