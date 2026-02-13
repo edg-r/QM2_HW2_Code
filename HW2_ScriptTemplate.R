@@ -786,3 +786,12 @@ q14_interpretation_support <- q14_support %>%
 # 2) Round outputs to match write-up language (about 1.61%, 66,128 thousand USD / 66.1 million USD, and 28.75 USD per capita).
 print_support_table("Table Q14 Interpretation. Code Form of the Written Findings", q14_interpretation_support)
 # PSEUDOCODE: print concise Q14 interpretation table ready to paste into A14.
+
+q14_per_capita_support <- q14_support %>%
+  transmute(
+    metric = "Implied per-capita GDP increase (USD)",
+    value_usd = round(implied_per_capita_increase_usd, 2)
+  )
+# PSEUDOCODE: create a one-metric table so the per-capita estimate is explicit and easy to find.
+print_support_table("Table Q14 Per-Capita Impact. Highlighted Result", q14_per_capita_support)
+# PSEUDOCODE: print the standalone per-capita estimate table (about 28.75 USD).
