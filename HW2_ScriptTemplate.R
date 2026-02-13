@@ -139,6 +139,31 @@ working_data <- working_data %>%
 # Section 3.4.4 - Transforming the Outcome Variables
 # --------------------------------------------------
 
+# UCSD GPS brand palette.
+gps_navy <- "#182B49"
+gps_gold <- "#C69214"
+gps_gold_50 <- "#E3C98A"
+gps_blue_50 <- "#80B1CD"
+gps_sand <- "#F5F0E6"
+# PSEUDOCODE: define the approved color constants once and reuse across all figures.
+
+# Shared GPS styling for consistent chart formatting.
+gps_base_theme <- theme_minimal(base_size = 12) +
+  theme(
+    plot.background = element_rect(fill = gps_sand, color = NA),
+    panel.background = element_rect(fill = gps_sand, color = NA),
+    panel.grid.major = element_line(color = scales::alpha(gps_navy, 0.18), linewidth = 0.35),
+    panel.grid.minor = element_line(color = scales::alpha(gps_navy, 0.08), linewidth = 0.2),
+    axis.title = element_text(color = gps_navy, face = "bold"),
+    axis.text = element_text(color = gps_navy),
+    plot.title = element_text(color = gps_navy, face = "bold"),
+    legend.title = element_text(color = gps_navy, face = "bold"),
+    legend.text = element_text(color = gps_navy),
+    legend.background = element_rect(fill = gps_sand, color = NA),
+    legend.key = element_rect(fill = gps_sand, color = NA)
+  )
+# PSEUDOCODE: create one reusable plot theme with GPS backgrounds, text colors, and grid styling.
+
 # Figure footnotes (embedded in exported images via plot captions).
 figure_footnote_1 <- str_wrap(
   "Figure 1 shows the distribution of 2023 NAICS 71 GDP per capita across metropolitan counties. The histogram indicates most counties are concentrated at lower-to-moderate values, with a smaller right tail at higher GDP per-capita levels.",
@@ -159,7 +184,7 @@ figure_footnote_4 <- str_wrap(
 
 # Shared caption styling so all footnotes are italic and visible in saved PNGs.
 footnote_caption_theme <- theme(
-  plot.caption = element_text(face = "italic", hjust = 0, size = 9, margin = margin(t = 10)),
+  plot.caption = element_text(face = "italic", color = gps_navy, hjust = 0, size = 9, margin = margin(t = 10)),
   plot.margin = margin(t = 5.5, r = 5.5, b = 16, l = 5.5)
 )
 # PSEUDOCODE: define one reusable italic caption style for all exported figures.
@@ -183,13 +208,13 @@ naics_71_data <- working_data %>%
 
 # Build histogram to inspect the 2023 per-capita GDP distribution for NAICS 71.
 histogram_pc <- ggplot(naics_71_data, aes(x = `2023`)) +
-  geom_histogram(binwidth = 0.5, fill = "steelblue", color = "black") +
+  geom_histogram(binwidth = 0.5, fill = gps_blue_50, color = gps_navy, linewidth = 0.35) +
   labs(title = "Distribution of 2023 GDP Per Capita (NAICS 71)",
        x = "GDP Per Capita (Thousands USD)",
        y = "Number of Counties",
        caption = figure_footnote_1) +
   scale_y_continuous(breaks = scales::breaks_pretty(n = 12)) +
-  theme_minimal() +
+  gps_base_theme +
   footnote_caption_theme
 # PSEUDOCODE: create histogram object of 2023 NAICS 71 per-capita GDP.
 
@@ -198,7 +223,7 @@ print(histogram_pc)
 # PSEUDOCODE: display per-capita GDP histogram.
 
 # Export the figure for homework submission artifacts.
-ggsave("naics_71_gdp_per_capita_histogram.png", plot = histogram_pc, width = 8, height = 5, dpi = 300)
+ggsave("naics_71_gdp_per_capita_histogram.png", plot = histogram_pc, width = 8, height = 5, dpi = 300, bg = gps_sand)
 # PSEUDOCODE: save histogram image file to disk.
 
 # 4. Transform GDP variables to log of (1 + thousand per capita) values
@@ -217,13 +242,13 @@ naics_71_log_data <- working_data %>%
 
 # Build histogram to inspect shape after log transformation.
 histogram_log <- ggplot(naics_71_log_data, aes(x = `2023`)) +
-  geom_histogram(binwidth = 0.5, fill = "steelblue", color = "black") +
+  geom_histogram(binwidth = 0.5, fill = gps_gold_50, color = gps_navy, linewidth = 0.35) +
   labs(title = "Distribution of Log(1 + GDP Per Capita) in 2023 (NAICS 71)",
        x = "Log(1 + GDP Per Capita in Thousands USD)",
        y = "Number of Counties",
        caption = figure_footnote_2) +
   scale_y_continuous(breaks = scales::breaks_pretty(n = 12)) +
-  theme_minimal() +
+  gps_base_theme +
   footnote_caption_theme
 # PSEUDOCODE: create histogram object of logged 2023 NAICS 71 per-capita GDP.
 
@@ -232,7 +257,7 @@ print(histogram_log)
 # PSEUDOCODE: display logged GDP histogram.
 
 # Save the transformed histogram as a submission figure.
-ggsave("naics_71_log_gdp_per_capita_histogram.png", plot = histogram_log, width = 8, height = 5, dpi = 300)
+ggsave("naics_71_log_gdp_per_capita_histogram.png", plot = histogram_log, width = 8, height = 5, dpi = 300, bg = gps_sand)
 # PSEUDOCODE: save logged histogram image file.
 
 # ------------------------------------------------------------------------------------------------------------------------
@@ -268,16 +293,20 @@ trends_long <- trends_long %>%
 trends_plot <- ggplot(trends_long, aes(x = Year, y = avg_log_gdp_pc,
                                         color = as.factor(eras_tour_host),
                                         group = as.factor(eras_tour_host))) +
-  geom_line(linewidth = 1) +
-  geom_point(size = 2) +
+  geom_line(linewidth = 1.1) +
+  geom_point(size = 2.2) +
   labs(title = "Average Log GDP Per Capita (NAICS 71): Eras Tour Host vs Non-Host Counties",
        x = "Year",
        y = "Average Log GDP Per Capita",
        color = "Eras Tour Host",
        caption = figure_footnote_3) +
+  scale_color_manual(
+    values = c("0" = gps_navy, "1" = gps_gold),
+    labels = c("0" = "Non-Host", "1" = "Host")
+  ) +
   scale_x_continuous(breaks = 2001:2023, labels = 2001:2023) +
   scale_y_continuous(breaks = scales::breaks_pretty(n = 12)) +
-  theme_minimal() +
+  gps_base_theme +
   footnote_caption_theme +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 # PSEUDOCODE: build line plot comparing average log GDP trends for host vs non-host counties.
@@ -289,7 +318,7 @@ print(trends_plot)
 # 5. Save the plot as an image file
 
 # Save the trend figure for reporting.
-ggsave("naics_71_log_gdp_plot.png", plot = trends_plot, width = 12, height = 6, dpi = 300)
+ggsave("naics_71_log_gdp_plot.png", plot = trends_plot, width = 12, height = 6, dpi = 300, bg = gps_sand)
 # PSEUDOCODE: save trend comparison plot image.
 
 
@@ -350,16 +379,23 @@ plot_bar_with_ci <- function(variable, ci_variable, title, y_label) {
 
   # Draw bars for means and CI whiskers for the treated group.
   ggplot(plot_data, aes(x = as.factor(eras_tour_host), y = .data[[variable]], fill = as.factor(eras_tour_host))) +
-    geom_bar(stat = "identity", position = "dodge", width = 0.7) +
+    geom_bar(stat = "identity", position = "dodge", width = 0.7, color = gps_navy, linewidth = 0.35) +
     geom_errorbar(
       aes(ymin = .data[[variable]] - .data[[ci_variable]], ymax = .data[[variable]] + .data[[ci_variable]]),
       width = 0.2,
-      data = filter(plot_data, eras_tour_host == 1)
+      data = filter(plot_data, eras_tour_host == 1),
+      color = gps_navy,
+      linewidth = 0.7
     ) +
     labs(title = title, x = "Eras Tour Host", y = y_label, fill = "Eras Tour Host") +
+    scale_fill_manual(
+      values = c("0" = gps_blue_50, "1" = gps_gold_50),
+      labels = c("0" = "Non-Host", "1" = "Host")
+    ) +
+    scale_x_discrete(labels = c("0" = "Non-Host", "1" = "Host")) +
     scale_y_continuous(breaks = scales::breaks_pretty(n = 12)) +
-    theme_minimal() +
-    theme(plot.title = element_text(size = 10), axis.text.x = element_text(angle = 45, hjust = 1))
+    gps_base_theme +
+    theme(plot.title = element_text(size = 10), axis.text.x = element_text(angle = 20, hjust = 1))
   # PSEUDOCODE: return bar chart with treated-group CI error bar and labels/theme.
 }
 
@@ -383,7 +419,8 @@ final_panel <- ((plot1 | plot2) / (plot3 | plot4) / (plot5 | plot6)) +
   plot_annotation(
     caption = figure_footnote_4,
     theme = theme(
-      plot.caption = element_text(face = "italic", hjust = 0, size = 9, margin = margin(t = 10))
+      plot.caption = element_text(face = "italic", color = gps_navy, hjust = 0, size = 9, margin = margin(t = 10)),
+      plot.background = element_rect(fill = gps_sand, color = NA)
     )
   )
 # PSEUDOCODE: arrange six plots into a 3-rows-by-2-columns panel.
@@ -393,7 +430,7 @@ print(final_panel)
 # PSEUDOCODE: display combined demographic panel.
 
 # Export the demographic panel figure.
-ggsave("demographics_comparison_panel.png", plot = final_panel, width = 12, height = 10, dpi = 300)
+ggsave("demographics_comparison_panel.png", plot = final_panel, width = 12, height = 10, dpi = 300, bg = gps_sand)
 # PSEUDOCODE: save demographic panel image.
 
 
