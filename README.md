@@ -28,8 +28,8 @@ READ Excel sheets into:
   controls_data
   eras_data
 
-MERGE (inner join behavior) GDP + controls on GeoFIPS
-  keep matched rows only
+MERGE (left join behavior) GDP + controls on GeoFIPS
+  keep all GDP rows and append controls where available
   remove duplicate GeoName column
 
 FILTER to metro counties (Rural_Urban_Continuum_Code_2023 == 1)
@@ -85,11 +85,11 @@ END
 ### Merge A: GDP + Demographics
 
 ```r
-merged_data <- merge(cagdp_data, controls_data, by = "GeoFIPS", all.x = FALSE, all.y = FALSE)
+merged_data <- merge(cagdp_data, controls_data, by = "GeoFIPS", all.x = TRUE)
 ```
 
-- This is a base R `merge()` with inner-join behavior.
-- Only counties present in both datasets are retained.
+- This is a base R `merge()` with left-join behavior from the GDP table.
+- All GDP rows are retained; controls are attached when available.
 
 ### Merge B: Add Eras Tour Host Info
 
@@ -161,7 +161,7 @@ for industry in industries:
 
 ## 7. Unique R Features Used
 
-- Base R `merge()` with explicit inner vs left behavior
+- Base R `merge()` with left-join behavior for both merge steps
 - `dplyr::across()` for bulk year-column cleaning/transforms
 - `ifelse()` for BEA suppression replacement and treatment creation
 - `pivot_longer()` and `pivot_wider()` for reshaping
@@ -197,4 +197,3 @@ per_capita_increase_usd = total_increase_usd / 2,300,000
 ```bash
 Rscript HW2_ScriptTemplate.R
 ```
-
