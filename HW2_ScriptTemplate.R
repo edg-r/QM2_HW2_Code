@@ -42,7 +42,6 @@ merged_data <- merge(cagdp_data, controls_data, by = "GeoFIPS", all.x = FALSE, a
 
 # 4. Drop GeoName.y and rename GeoName.x to GeoName
 # Check the structure of the merged dataset to ensure the merge was successful
-
 # Drop duplicate county-name column from the right table and keep a clean GeoName field.
 merged_data <- merged_data %>%
   select(-GeoName.y) %>%
@@ -54,27 +53,23 @@ str(merged_data)
 # PSEUDOCODE: display variable names/types to confirm merge output.
 
 # 5. Filter the dataset to include only cases where Rural_Urban_Continuum_Code_2023 == 1
-
 # Restrict analysis sample to metro counties (RUCC code 1).
 filtered_data <- merged_data %>%
   filter(Rural_Urban_Continuum_Code_2023 == 1)
 # PSEUDOCODE: keep only counties with RUCC code equal to 1.
 
 # 6. Drop Rural_Urban_Continuum_Code_2023 from filtered_data
-
 # Remove the filter variable once it is no longer needed downstream.
 filtered_data <- filtered_data %>%
   select(-Rural_Urban_Continuum_Code_2023)
 # PSEUDOCODE: remove RUCC variable after filtering is complete.
 
 # 7. Merge eras_data into filtered_data. Name the resulting dataset working_data
-
 # Left-join host-county info so non-host counties remain in the analysis data.
 working_data <- merge(filtered_data, eras_data, by = "GeoFIPS", all.x = TRUE)
 # PSEUDOCODE: left join host info onto filtered counties by GeoFIPS.
 
 # 8. Check the dimension of working_data
-
 # Check final row/column count after all merges and filters.
 dim(working_data)
 # PSEUDOCODE: print number of rows and columns in working_data.
@@ -104,20 +99,17 @@ working_data_prelim <- working_data
 # ------------------------------------------------
 
 # 1. Identify the columns corresponding to years 2001 to 2023
-
 # Create a character vector so these year columns can be selected programmatically.
 year_columns <- as.character(2001:2023)
 # PSEUDOCODE: create list of year column names from 2001 to 2023.
 
 # 2. Replace "(D)" with NA and convert the columns to numeric
-
 # Replace BEA suppression marker "(D)" with NA before numeric conversion.
 working_data <- working_data %>%
   mutate(across(all_of(year_columns), ~ ifelse(.x == "(D)", NA, .x)))
 # PSEUDOCODE: in each year column, replace "(D)" suppression string with missing value.
 
 # 3. Convert these variables to numeric data type after replacing (D) with NA.
-
 # Convert year columns from character to numeric for arithmetic and regressions.
 working_data <- working_data %>%
   mutate(across(all_of(year_columns), as.numeric))
@@ -128,7 +120,6 @@ working_data <- working_data %>%
 # --------------------------------------------------------------------------------
 
 # 1. Add a binary indicator for hosting an Eras Tour concert in 2023
-
 # Create treatment indicator: 1 if county hosted the Eras Tour, 0 otherwise.
 working_data <- working_data %>%
   mutate(eras_tour_host = ifelse(!is.na(Hosted) & Hosted == "Yes", 1, 0))
@@ -258,7 +249,7 @@ print(histogram_log)
 
 # Save the transformed histogram as a submission figure.
 ggsave("naics_71_log_gdp_per_capita_histogram.png", plot = histogram_log, width = 8, height = 5, dpi = 300, bg = gps_sand)
-# PSEUDOCODE: save logged histogram image file.
+# PSEUDOCODE: save logged histogram image file. 
 
 # ------------------------------------------------------------------------------------------------------------------------
 # Section 3.5 - Analyzing Time Trends in Arts, Entertainment, and Recreation Industry (NAICS 71) Annual Log GDP per Capita
@@ -369,7 +360,6 @@ summary_with_ci <- regression_data %>%
 # PSEUDOCODE: summarize means by host group and compute treated-group 95% confidence intervals.
 
 # 4. Generate the save the bar plots in a panel
-
 # Helper to standardize bar-chart creation across demographic variables.
 plot_bar_with_ci <- function(variable, ci_variable, title, y_label) {
   # Keep rows where the plotted summary statistic exists.
@@ -433,23 +423,17 @@ print(final_panel)
 ggsave("demographics_comparison_panel.png", plot = final_panel, width = 12, height = 10, dpi = 300, bg = gps_sand)
 # PSEUDOCODE: save demographic panel image.
 
-
-# ------------------------------------------
-# Section 3.7 - Multiple Regression Analyses
-# ------------------------------------------
 # -------------------------------------------------------------------------------------
 # Section 3.7.1 - Regression Analysis: Industries Most Likely to Be Impacted (NAICS 71)
 # -------------------------------------------------------------------------------------
 
 # 1. Filter the dataset to only include NAICS 71
-
 # Keep only NAICS 71 rows for the first regression set.
 reg_naics_71 <- working_data %>%
   filter(IndustryClassification == "71")
 # PSEUDOCODE: subset analysis data to NAICS 71 for regressions.
 
 # 2. Prepare population characteristics and relevant variables
-
 # Add standardized education-share controls used across model specifications.
 reg_naics_71 <- reg_naics_71 %>%
   mutate(
@@ -461,7 +445,6 @@ reg_naics_71 <- reg_naics_71 %>%
 # PSEUDOCODE: add education-share controls to NAICS 71 dataset.
 
 # 3. Define regression models with progressively added controls
-
 # Baseline specification with treatment indicator only.
 model1_71 <- lm(`2023` ~ eras_tour_host, data = reg_naics_71)
 # PSEUDOCODE: estimate baseline OLS with host indicator only.
@@ -483,7 +466,6 @@ model5_71 <- lm(`2023` ~ eras_tour_host + Less_than_HS_Share + HS_Only_Share + S
 # PSEUDOCODE: estimate OLS adding lagged 2022 outcome.
 
 # 4. Generate the regression table with stargazer
-
 # Export NAICS 71 model outputs into a single formatted regression table.
 stargazer(model1_71, model2_71, model3_71, model4_71, model5_71,
           type = "text",
@@ -501,14 +483,12 @@ stargazer(model1_71, model2_71, model3_71, model4_71, model5_71,
 # -------------------------------------------------------------------------------------
 
 # 1. Filter the dataset to only include NAICS 72
-
 # Keep only NAICS 72 rows for the second regression set.
 reg_naics_72 <- working_data %>%
   filter(IndustryClassification == "72")
 # PSEUDOCODE: subset analysis data to NAICS 72 for regressions.
 
 # 2. Prepare population characteristics and relevant variables
-
 # Add the same standardized education-share controls for comparability.
 reg_naics_72 <- reg_naics_72 %>%
   mutate(
@@ -520,7 +500,6 @@ reg_naics_72 <- reg_naics_72 %>%
 # PSEUDOCODE: add education-share controls to NAICS 72 dataset.
 
 # 3. Define regression models with progressively added controls
-
 # Baseline specification with treatment indicator only.
 model1_72 <- lm(`2023` ~ eras_tour_host, data = reg_naics_72)
 # PSEUDOCODE: estimate baseline OLS with host indicator only.
@@ -542,7 +521,6 @@ model5_72 <- lm(`2023` ~ eras_tour_host + Less_than_HS_Share + HS_Only_Share + S
 # PSEUDOCODE: estimate OLS adding lagged 2022 outcome.
 
 # 4. Generate the regression table with stargazer
-
 # Export NAICS 72 model outputs into a single formatted regression table.
 stargazer(model1_72, model2_72, model3_72, model4_72, model5_72,
           type = "text",
@@ -555,20 +533,17 @@ stargazer(model1_72, model2_72, model3_72, model4_72, model5_72,
 # PSEUDOCODE: export NAICS 72 regression models into one HTML table.
 
 
-
 # -------------------------------------------------------------------------------------------
 # Section 3.7.3 - Regression Analysis: Industries Moderately Likely to Be Impacted (NAICS 54)
 # -------------------------------------------------------------------------------------------
 
 # 1. Filter the dataset to only include NAICS 54
-
 # Keep only NAICS 54 rows for the third regression set.
 reg_naics_54 <- working_data %>%
   filter(IndustryClassification == "54")
 # PSEUDOCODE: subset analysis data to NAICS 54 for regressions.
 
 # 2. Prepare population characteristics and relevant variables
-
 # Add the same standardized education-share controls for comparability.
 reg_naics_54 <- reg_naics_54 %>%
   mutate(
@@ -580,7 +555,6 @@ reg_naics_54 <- reg_naics_54 %>%
 # PSEUDOCODE: add education-share controls to NAICS 54 dataset.
 
 # 3. Define regression models with progressively added controls
-
 # Baseline specification with treatment indicator only.
 model1_54 <- lm(`2023` ~ eras_tour_host, data = reg_naics_54)
 # PSEUDOCODE: estimate baseline OLS with host indicator only.
@@ -602,7 +576,6 @@ model5_54 <- lm(`2023` ~ eras_tour_host + Less_than_HS_Share + HS_Only_Share + S
 # PSEUDOCODE: estimate OLS adding lagged 2022 outcome.
 
 # 4. Generate the regression table with stargazer
-
 # Export NAICS 54 model outputs into a single formatted regression table.
 stargazer(model1_54, model2_54, model3_54, model4_54, model5_54,
           type = "text",
