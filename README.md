@@ -130,24 +130,19 @@ mutate(across(all_of(year_columns), ~ log(1 + .x)))
 
 ## 6.1 Current pattern in the script
 
-- The script uses explicit `lm()` calls per model and per industry.
-- Each industry gets five nested models:
+- The script now runs industry regressions via a real `for` loop over an `industry_specs` lookup table (`71`, `72`, `54`, `11`).
+- Each loop iteration:
+  - builds one industry dataset with standardized controls (`prepare_industry_regression_data`)
+  - fits five nested models (`fit_industry_models`)
+  - exports one `stargazer` table for that industry
+- Model structure per industry remains:
   - Model 1: host only
   - Model 2: + education shares
   - Model 3: + poverty
   - Model 4: + net migration
   - Model 5: + lagged GDP (`2022`)
 
-This is repeated for NAICS `71`, `72`, `54`, and `11`.
-
-## 6.2 “Loop-like” reuse pattern actually used
-
-- A helper function `extract_host_effect(model, industry, model_name)` is used to avoid repeated post-estimation extraction logic.
-- `bind_rows()` is used to stack model summaries across models/industries.
-
-So the script currently uses function-based reuse for output assembly, even though model estimation itself is written explicitly.
-
-## 6.3 For-loop style pseudocode equivalent (conceptual)
+## 6.2 Loop pseudocode (implemented)
 
 ```text
 industries = [71, 72, 54, 11]
@@ -159,6 +154,10 @@ for industry in industries:
   export one stargazer table for this industry
 ```
 
+## 6.3 Backward-compatible objects
+
+- After the loop, the script maps results to legacy names (`reg_naics_71`, `model1_71`, ..., `model5_11`) so downstream Q-support code works unchanged.
+
 ## 7. Unique R Features Used
 
 - Base R `merge()` with left-join behavior for both merge steps
@@ -166,7 +165,8 @@ for industry in industries:
 - `ifelse()` for BEA suppression replacement and treatment creation
 - `pivot_longer()` and `pivot_wider()` for reshaping
 - `patchwork` for multi-plot panel assembly with panel-level footnote caption
-- Custom helper functions for table labeling and coefficient extraction
+- A `for`-loop + metadata table (`industry_specs`) to automate multi-industry regression runs
+- Custom helper functions for data prep, model fitting, table labeling, and coefficient extraction
 - Log-effect interpretation conversion via `exp(beta) - 1`
 
 ## 8. Q14 Calculation Logic (Pseudocode)
