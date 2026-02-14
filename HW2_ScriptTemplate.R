@@ -494,36 +494,12 @@ for (i in seq_len(nrow(industry_specs))) {
 }
 # PSEUDOCODE: loop across NAICS codes, fit models, store results, and export formatted regression tables.
 
-# Backward-compatible aliases so downstream Q-support code can stay unchanged.
-reg_naics_71 <- industry_regression_results[["71"]]$data
-reg_naics_72 <- industry_regression_results[["72"]]$data
-reg_naics_54 <- industry_regression_results[["54"]]$data
-reg_naics_11 <- industry_regression_results[["11"]]$data
-
-model1_71 <- industry_regression_results[["71"]]$models$model1
-model2_71 <- industry_regression_results[["71"]]$models$model2
-model3_71 <- industry_regression_results[["71"]]$models$model3
-model4_71 <- industry_regression_results[["71"]]$models$model4
-model5_71 <- industry_regression_results[["71"]]$models$model5
-
-model1_72 <- industry_regression_results[["72"]]$models$model1
-model2_72 <- industry_regression_results[["72"]]$models$model2
-model3_72 <- industry_regression_results[["72"]]$models$model3
-model4_72 <- industry_regression_results[["72"]]$models$model4
-model5_72 <- industry_regression_results[["72"]]$models$model5
-
-model1_54 <- industry_regression_results[["54"]]$models$model1
-model2_54 <- industry_regression_results[["54"]]$models$model2
-model3_54 <- industry_regression_results[["54"]]$models$model3
-model4_54 <- industry_regression_results[["54"]]$models$model4
-model5_54 <- industry_regression_results[["54"]]$models$model5
-
-model1_11 <- industry_regression_results[["11"]]$models$model1
-model2_11 <- industry_regression_results[["11"]]$models$model2
-model3_11 <- industry_regression_results[["11"]]$models$model3
-model4_11 <- industry_regression_results[["11"]]$models$model4
-model5_11 <- industry_regression_results[["11"]]$models$model5
-# PSEUDOCODE: map loop outputs to legacy object names required by later sections.
+# Helpers to access loop-generated models for support tables.
+get_industry_model <- function(industry_code, model_number) {
+  model_key <- paste0("model", model_number)
+  industry_regression_results[[industry_code]]$models[[model_key]]
+}
+# PSEUDOCODE: return one fitted model from loop results using industry code and model number.
 
 
 # ------------------------------------------------------
@@ -638,30 +614,40 @@ extract_host_effect <- function(model, industry, model_name) {
 }
 
 # Q10 support: Model 5 host effect in NAICS 71.
-q10_support <- extract_host_effect(model5_71, "NAICS 71", "Model 5")
+q10_support <- extract_host_effect(get_industry_model("71", 5), "NAICS 71", "Model 5")
 # PSEUDOCODE: extract Model 5 host effect details for NAICS 71.
 print_support_table("Table Q10. NAICS 71 Model 5 Host Effect", q10_support)
 # PSEUDOCODE: print estimate and significance needed for Q10.
 
 # Q12 support: host coefficient movement across NAICS 71 models.
 q12_support <- bind_rows(
-  extract_host_effect(model1_71, "NAICS 71", "Model 1"),
-  extract_host_effect(model2_71, "NAICS 71", "Model 2"),
-  extract_host_effect(model3_71, "NAICS 71", "Model 3"),
-  extract_host_effect(model4_71, "NAICS 71", "Model 4"),
-  extract_host_effect(model5_71, "NAICS 71", "Model 5")
+  lapply(1:5, function(m) {
+    extract_host_effect(get_industry_model("71", m), "NAICS 71", paste("Model", m))
+  })
 )
 # PSEUDOCODE: stack NAICS 71 model summaries to track coefficient changes with added controls.
 print_support_table("Table Q12. NAICS 71 Host Coefficient Across Models 1-5", q12_support)
 # PSEUDOCODE: display coefficient path used to discuss omitted variable bias in Q12.
 
 # Q13 support: compare Model 5 host effects across industries.
-q13_support <- bind_rows(
-  extract_host_effect(model5_71, "NAICS 71", "Model 5"),
-  extract_host_effect(model5_72, "NAICS 72", "Model 5"),
-  extract_host_effect(model5_54, "NAICS 54", "Model 5"),
-  extract_host_effect(model5_11, "NAICS 11", "Model 5")
+q13_specs <- tribble(
+  ~industry_code, ~industry_label,
+  "71", "NAICS 71",
+  "72", "NAICS 72",
+  "54", "NAICS 54",
+  "11", "NAICS 11"
 )
+# PSEUDOCODE: define industries requested in Q13 and their display labels.
+
+q13_support <- q13_specs %>%
+  mutate(
+    model_summary = map2(
+      industry_code, industry_label,
+      ~ extract_host_effect(get_industry_model(.x, 5), .y, "Model 5")
+    )
+  ) %>%
+  pull(model_summary) %>%
+  bind_rows()
 # PSEUDOCODE: combine Model 5 host effects across all requested industries.
 print_support_table("Table Q13. Model 5 Host Effects Across Industries", q13_support)
 # PSEUDOCODE: print cross-industry evidence for Q13.
