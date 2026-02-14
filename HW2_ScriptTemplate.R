@@ -9,9 +9,6 @@
 # 1. Set your working directory and load the necessary packages in your R script.
 # setwd("/Users/edgar/Documents/01 Projects/GPCO 454 - QM2 - Ravanilla/HomeWork/HW2")
 getwd()
-# PSEUDOCODE: print current folder path to verify setwd worked.
-if (!file.exists("HW2_CAGDP2_ALL_AREAS_2001_2023.xlsx")) stop("Run this script from the HW2 folder, or set the working directory first.")
-# PSEUDOCODE: stop early with a clear message if input files are not reachable from current folder.
 
 # Load necessary packages
 # Read Excel files.
@@ -839,3 +836,24 @@ q14_per_capita_support <- q14_support %>%
 # PSEUDOCODE: create a one-metric table so the per-capita estimate is explicit and easy to find.
 print_support_table("Table Q14 Per-Capita Impact. Highlighted Result", q14_per_capita_support)
 # PSEUDOCODE: print the standalone per-capita estimate table (about 28.75 USD).
+
+q14_simple_summary <- q14_support %>%
+  transmute(
+    percent_increase = round(percentage_increase, 2),
+    total_gdp_increase_usd = round(implied_total_gdp_increase_usd, 0),
+    total_gdp_increase_million_usd = round(implied_total_gdp_increase_usd / 1e6, 1),
+    per_capita_gdp_increase_usd = round(implied_per_capita_increase_usd, 2)
+  )
+# PSEUDOCODE: build one compact table with percent, total GDP increase, and per-capita increase.
+print_support_table("Table Q14 Simple Summary. Percent, Total GDP, and Per-Capita Impact", q14_simple_summary)
+# PSEUDOCODE: print a single table containing the key Q14 values together.
+
+cat(
+  "\nQ14 key values (cat output)\n",
+  "Percent increase: ", sprintf("%.2f%%", q14_simple_summary$percent_increase[1]), "\n",
+  "Total GDP increase (USD): $", format(q14_simple_summary$total_gdp_increase_usd[1], big.mark = ",", scientific = FALSE), "\n",
+  "Total GDP increase (million USD): $", sprintf("%.1fM", q14_simple_summary$total_gdp_increase_million_usd[1]), "\n",
+  "Per-capita GDP increase (USD): $", sprintf("%.2f", q14_simple_summary$per_capita_gdp_increase_usd[1]), "\n",
+  sep = ""
+)
+# PSEUDOCODE: cat the same Q14 key values in plain text for quick copy/paste into the write-up.
