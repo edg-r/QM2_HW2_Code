@@ -471,6 +471,7 @@ stargazer(model1_71, model2_71, model3_71, model4_71, model5_71,
           covariate.labels = c("Eras Tour Host", "Less than HS Share", "HS Only Share",
                                "Some College Share", "Bachelors or Higher Share",
                                "Poverty Rate (2021)", "Net Migration (2023)", "Log GDP Per Capita (2022)"),
+          digits = 4,
           out = "regression_table_naics_71.html")
 # PSEUDOCODE: export NAICS 71 regression models into one HTML table.
 
@@ -526,6 +527,7 @@ stargazer(model1_72, model2_72, model3_72, model4_72, model5_72,
           covariate.labels = c("Eras Tour Host", "Less than HS Share", "HS Only Share",
                                "Some College Share", "Bachelors or Higher Share",
                                "Poverty Rate (2021)", "Net Migration (2023)", "Log GDP Per Capita (2022)"),
+          digits = 4,
           out = "regression_table_naics_72.html")
 # PSEUDOCODE: export NAICS 72 regression models into one HTML table.
 
@@ -581,6 +583,7 @@ stargazer(model1_54, model2_54, model3_54, model4_54, model5_54,
           covariate.labels = c("Eras Tour Host", "Less than HS Share", "HS Only Share",
                                "Some College Share", "Bachelors or Higher Share",
                                "Poverty Rate (2021)", "Net Migration (2023)", "Log GDP Per Capita (2022)"),
+          digits = 4,
           out = "regression_table_naics_54.html")
 # PSEUDOCODE: export NAICS 54 regression models into one HTML table.
 
@@ -640,6 +643,7 @@ stargazer(model1_11, model2_11, model3_11, model4_11, model5_11,
           covariate.labels = c("Eras Tour Host", "Less than HS Share", "HS Only Share",
                                "Some College Share", "Bachelors or Higher Share",
                                "Poverty Rate (2021)", "Net Migration (2023)", "Log GDP Per Capita (2022)"),
+          digits = 4,
           out = "regression_table_naics_11.html")
 # PSEUDOCODE: export NAICS 11 regression models into one HTML table.
 
