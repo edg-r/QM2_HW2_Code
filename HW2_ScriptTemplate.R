@@ -420,232 +420,110 @@ print(final_panel)
 ggsave("demographics_comparison_panel.png", plot = final_panel, width = 12, height = 10, dpi = 300, bg = gps_sand)
 # PSEUDOCODE: save demographic panel image.
 
-# -------------------------------------------------------------------------------------
-# Section 3.7.1 - Regression Analysis: Industries Most Likely to Be Impacted (NAICS 71)
-# -------------------------------------------------------------------------------------
+# ------------------------------------------
+# Section 3.7 - Multiple Regression Analyses
+# ------------------------------------------
 
-# 1. Filter the dataset to only include NAICS 71
-# Keep only NAICS 71 rows for the first regression set.
-reg_naics_71 <- working_data %>%
-  filter(IndustryClassification == "71")
-# PSEUDOCODE: subset analysis data to NAICS 71 for regressions.
+# Define per-industry metadata for looped regression execution.
+industry_specs <- tribble(
+  ~industry_code, ~table_title, ~table_out,
+  "71", "Regression Results: NAICS 71 - Arts, Entertainment, and Recreation", "regression_table_naics_71.html",
+  "72", "Regression Results: NAICS 72 - Accommodation and Food Services", "regression_table_naics_72.html",
+  "54", "Regression Results: NAICS 54 - Professional, Scientific, and Technical Services", "regression_table_naics_54.html",
+  "11", "Regression Results: NAICS 11 - Agriculture, Forestry, Fishing, and Hunting", "regression_table_naics_11.html"
+)
+# PSEUDOCODE: store industry code and output metadata in a lookup table for looping.
 
-# 2. Prepare population characteristics and relevant variables
-# Add standardized education-share controls used across model specifications.
-reg_naics_71 <- reg_naics_71 %>%
-  mutate(
-    Less_than_HS_Share = (`Less than a high school diploma, 2018-22` / POP_ESTIMATE_2023) * 100,
-    HS_Only_Share = (`High school diploma only, 2018-22` / POP_ESTIMATE_2023) * 100,
-    Some_College_Share = (`Some college or associate's degree, 2018-22` / POP_ESTIMATE_2023) * 100,
-    Bachelors_or_Higher_Share = (`Bachelor's degree or higher, 2018-22` / POP_ESTIMATE_2023) * 100
+# Helper: build one industry's regression dataset with standardized controls.
+prepare_industry_regression_data <- function(data, industry_code) {
+  data %>%
+    filter(IndustryClassification == industry_code) %>%
+    mutate(
+      Less_than_HS_Share = (`Less than a high school diploma, 2018-22` / POP_ESTIMATE_2023) * 100,
+      HS_Only_Share = (`High school diploma only, 2018-22` / POP_ESTIMATE_2023) * 100,
+      Some_College_Share = (`Some college or associate's degree, 2018-22` / POP_ESTIMATE_2023) * 100,
+      Bachelors_or_Higher_Share = (`Bachelor's degree or higher, 2018-22` / POP_ESTIMATE_2023) * 100
+    )
+}
+# PSEUDOCODE: filter to one NAICS industry and compute education-share controls.
+
+# Helper: fit the five assignment model specifications (unchanged formulas).
+fit_industry_models <- function(reg_data) {
+  list(
+    model1 = lm(`2023` ~ eras_tour_host, data = reg_data),
+    model2 = lm(`2023` ~ eras_tour_host + Less_than_HS_Share + HS_Only_Share + Some_College_Share + Bachelors_or_Higher_Share, data = reg_data),
+    model3 = lm(`2023` ~ eras_tour_host + Less_than_HS_Share + HS_Only_Share + Some_College_Share + Bachelors_or_Higher_Share + PCTPOVALL_2021, data = reg_data),
+    model4 = lm(`2023` ~ eras_tour_host + Less_than_HS_Share + HS_Only_Share + Some_College_Share + Bachelors_or_Higher_Share + PCTPOVALL_2021 + NET_MIG_2023, data = reg_data),
+    model5 = lm(`2023` ~ eras_tour_host + Less_than_HS_Share + HS_Only_Share + Some_College_Share + Bachelors_or_Higher_Share + PCTPOVALL_2021 + NET_MIG_2023 + `2022`, data = reg_data)
   )
-# PSEUDOCODE: add education-share controls to NAICS 71 dataset.
+}
+# PSEUDOCODE: fit the same five nested OLS models used previously.
 
-# 3. Define regression models with progressively added controls
-# Baseline specification with treatment indicator only.
-model1_71 <- lm(`2023` ~ eras_tour_host, data = reg_naics_71)
-# PSEUDOCODE: estimate baseline OLS with host indicator only.
+# Execute regressions by looping through industries and export one stargazer table per industry.
+industry_regression_results <- list()
+# PSEUDOCODE: create a container to store each industry's data and fitted models.
 
-# Add education controls to reduce compositional confounding.
-model2_71 <- lm(`2023` ~ eras_tour_host + Less_than_HS_Share + HS_Only_Share + Some_College_Share + Bachelors_or_Higher_Share, data = reg_naics_71)
-# PSEUDOCODE: estimate OLS adding education controls.
+for (i in seq_len(nrow(industry_specs))) {
+  spec <- industry_specs[i, ]
+  industry_code <- spec$industry_code[[1]]
+  table_title <- spec$table_title[[1]]
+  table_out <- spec$table_out[[1]]
 
-# Add county poverty rate control.
-model3_71 <- lm(`2023` ~ eras_tour_host + Less_than_HS_Share + HS_Only_Share + Some_College_Share + Bachelors_or_Higher_Share + PCTPOVALL_2021, data = reg_naics_71)
-# PSEUDOCODE: estimate OLS adding poverty control.
+  reg_data <- prepare_industry_regression_data(working_data, industry_code)
+  models <- fit_industry_models(reg_data)
+  industry_regression_results[[industry_code]] <- list(data = reg_data, models = models)
 
-# Add net migration to account for recent county inflow/outflow dynamics.
-model4_71 <- lm(`2023` ~ eras_tour_host + Less_than_HS_Share + HS_Only_Share + Some_College_Share + Bachelors_or_Higher_Share + PCTPOVALL_2021 + NET_MIG_2023, data = reg_naics_71)
-# PSEUDOCODE: estimate OLS adding net migration control.
+  m1 <- models$model1
+  m2 <- models$model2
+  m3 <- models$model3
+  m4 <- models$model4
+  m5 <- models$model5
+  # PSEUDOCODE: assign models to plain object names so stargazer parses them reliably.
 
-# Add lagged outcome to control for pre-existing economic level.
-model5_71 <- lm(`2023` ~ eras_tour_host + Less_than_HS_Share + HS_Only_Share + Some_College_Share + Bachelors_or_Higher_Share + PCTPOVALL_2021 + NET_MIG_2023 + `2022`, data = reg_naics_71)
-# PSEUDOCODE: estimate OLS adding lagged 2022 outcome.
-
-# 4. Generate the regression table with stargazer
-# Export NAICS 71 model outputs into a single formatted regression table.
-stargazer(model1_71, model2_71, model3_71, model4_71, model5_71,
-          type = "text",
-          title = "Regression Results: NAICS 71 - Arts, Entertainment, and Recreation",
-          dep.var.labels = "Log GDP Per Capita (2023)",
-          covariate.labels = c("Eras Tour Host", "Less than HS Share", "HS Only Share",
-                               "Some College Share", "Bachelors or Higher Share",
-                               "Poverty Rate (2021)", "Net Migration (2023)", "Log GDP Per Capita (2022)"),
-          digits = 4,
-          out = "regression_table_naics_71.html")
-# PSEUDOCODE: export NAICS 71 regression models into one HTML table.
-
-
-# -------------------------------------------------------------------------------------
-# Section 3.7.2 - Regression Analysis: Industries Most Likely to Be Impacted (NAICS 72)
-# -------------------------------------------------------------------------------------
-
-# 1. Filter the dataset to only include NAICS 72
-# Keep only NAICS 72 rows for the second regression set.
-reg_naics_72 <- working_data %>%
-  filter(IndustryClassification == "72")
-# PSEUDOCODE: subset analysis data to NAICS 72 for regressions.
-
-# 2. Prepare population characteristics and relevant variables
-# Add the same standardized education-share controls for comparability.
-reg_naics_72 <- reg_naics_72 %>%
-  mutate(
-    Less_than_HS_Share = (`Less than a high school diploma, 2018-22` / POP_ESTIMATE_2023) * 100,
-    HS_Only_Share = (`High school diploma only, 2018-22` / POP_ESTIMATE_2023) * 100,
-    Some_College_Share = (`Some college or associate's degree, 2018-22` / POP_ESTIMATE_2023) * 100,
-    Bachelors_or_Higher_Share = (`Bachelor's degree or higher, 2018-22` / POP_ESTIMATE_2023) * 100
+  stargazer(
+    m1, m2, m3, m4, m5,
+    type = "text",
+    title = table_title,
+    dep.var.labels = "Log GDP Per Capita (2023)",
+    covariate.labels = c("Eras Tour Host", "Less than HS Share", "HS Only Share",
+                         "Some College Share", "Bachelors or Higher Share",
+                         "Poverty Rate (2021)", "Net Migration (2023)", "Log GDP Per Capita (2022)"),
+    digits = 4,
+    out = table_out
   )
-# PSEUDOCODE: add education-share controls to NAICS 72 dataset.
+}
+# PSEUDOCODE: loop across NAICS codes, fit models, store results, and export formatted regression tables.
 
-# 3. Define regression models with progressively added controls
-# Baseline specification with treatment indicator only.
-model1_72 <- lm(`2023` ~ eras_tour_host, data = reg_naics_72)
-# PSEUDOCODE: estimate baseline OLS with host indicator only.
+# Backward-compatible aliases so downstream Q-support code can stay unchanged.
+reg_naics_71 <- industry_regression_results[["71"]]$data
+reg_naics_72 <- industry_regression_results[["72"]]$data
+reg_naics_54 <- industry_regression_results[["54"]]$data
+reg_naics_11 <- industry_regression_results[["11"]]$data
 
-# Add education controls to reduce compositional confounding.
-model2_72 <- lm(`2023` ~ eras_tour_host + Less_than_HS_Share + HS_Only_Share + Some_College_Share + Bachelors_or_Higher_Share, data = reg_naics_72)
-# PSEUDOCODE: estimate OLS adding education controls.
+model1_71 <- industry_regression_results[["71"]]$models$model1
+model2_71 <- industry_regression_results[["71"]]$models$model2
+model3_71 <- industry_regression_results[["71"]]$models$model3
+model4_71 <- industry_regression_results[["71"]]$models$model4
+model5_71 <- industry_regression_results[["71"]]$models$model5
 
-# Add county poverty rate control.
-model3_72 <- lm(`2023` ~ eras_tour_host + Less_than_HS_Share + HS_Only_Share + Some_College_Share + Bachelors_or_Higher_Share + PCTPOVALL_2021, data = reg_naics_72)
-# PSEUDOCODE: estimate OLS adding poverty control.
+model1_72 <- industry_regression_results[["72"]]$models$model1
+model2_72 <- industry_regression_results[["72"]]$models$model2
+model3_72 <- industry_regression_results[["72"]]$models$model3
+model4_72 <- industry_regression_results[["72"]]$models$model4
+model5_72 <- industry_regression_results[["72"]]$models$model5
 
-# Add net migration to account for recent county inflow/outflow dynamics.
-model4_72 <- lm(`2023` ~ eras_tour_host + Less_than_HS_Share + HS_Only_Share + Some_College_Share + Bachelors_or_Higher_Share + PCTPOVALL_2021 + NET_MIG_2023, data = reg_naics_72)
-# PSEUDOCODE: estimate OLS adding net migration control.
+model1_54 <- industry_regression_results[["54"]]$models$model1
+model2_54 <- industry_regression_results[["54"]]$models$model2
+model3_54 <- industry_regression_results[["54"]]$models$model3
+model4_54 <- industry_regression_results[["54"]]$models$model4
+model5_54 <- industry_regression_results[["54"]]$models$model5
 
-# Add lagged outcome to control for pre-existing economic level.
-model5_72 <- lm(`2023` ~ eras_tour_host + Less_than_HS_Share + HS_Only_Share + Some_College_Share + Bachelors_or_Higher_Share + PCTPOVALL_2021 + NET_MIG_2023 + `2022`, data = reg_naics_72)
-# PSEUDOCODE: estimate OLS adding lagged 2022 outcome.
-
-# 4. Generate the regression table with stargazer
-# Export NAICS 72 model outputs into a single formatted regression table.
-stargazer(model1_72, model2_72, model3_72, model4_72, model5_72,
-          type = "text",
-          title = "Regression Results: NAICS 72 - Accommodation and Food Services",
-          dep.var.labels = "Log GDP Per Capita (2023)",
-          covariate.labels = c("Eras Tour Host", "Less than HS Share", "HS Only Share",
-                               "Some College Share", "Bachelors or Higher Share",
-                               "Poverty Rate (2021)", "Net Migration (2023)", "Log GDP Per Capita (2022)"),
-          digits = 4,
-          out = "regression_table_naics_72.html")
-# PSEUDOCODE: export NAICS 72 regression models into one HTML table.
-
-
-# -------------------------------------------------------------------------------------------
-# Section 3.7.3 - Regression Analysis: Industries Moderately Likely to Be Impacted (NAICS 54)
-# -------------------------------------------------------------------------------------------
-
-# 1. Filter the dataset to only include NAICS 54
-# Keep only NAICS 54 rows for the third regression set.
-reg_naics_54 <- working_data %>%
-  filter(IndustryClassification == "54")
-# PSEUDOCODE: subset analysis data to NAICS 54 for regressions.
-
-# 2. Prepare population characteristics and relevant variables
-# Add the same standardized education-share controls for comparability.
-reg_naics_54 <- reg_naics_54 %>%
-  mutate(
-    Less_than_HS_Share = (`Less than a high school diploma, 2018-22` / POP_ESTIMATE_2023) * 100,
-    HS_Only_Share = (`High school diploma only, 2018-22` / POP_ESTIMATE_2023) * 100,
-    Some_College_Share = (`Some college or associate's degree, 2018-22` / POP_ESTIMATE_2023) * 100,
-    Bachelors_or_Higher_Share = (`Bachelor's degree or higher, 2018-22` / POP_ESTIMATE_2023) * 100
-  )
-# PSEUDOCODE: add education-share controls to NAICS 54 dataset.
-
-# 3. Define regression models with progressively added controls
-# Baseline specification with treatment indicator only.
-model1_54 <- lm(`2023` ~ eras_tour_host, data = reg_naics_54)
-# PSEUDOCODE: estimate baseline OLS with host indicator only.
-
-# Add education controls to reduce compositional confounding.
-model2_54 <- lm(`2023` ~ eras_tour_host + Less_than_HS_Share + HS_Only_Share + Some_College_Share + Bachelors_or_Higher_Share, data = reg_naics_54)
-# PSEUDOCODE: estimate OLS adding education controls.
-
-# Add county poverty rate control.
-model3_54 <- lm(`2023` ~ eras_tour_host + Less_than_HS_Share + HS_Only_Share + Some_College_Share + Bachelors_or_Higher_Share + PCTPOVALL_2021, data = reg_naics_54)
-# PSEUDOCODE: estimate OLS adding poverty control.
-
-# Add net migration to account for recent county inflow/outflow dynamics.
-model4_54 <- lm(`2023` ~ eras_tour_host + Less_than_HS_Share + HS_Only_Share + Some_College_Share + Bachelors_or_Higher_Share + PCTPOVALL_2021 + NET_MIG_2023, data = reg_naics_54)
-# PSEUDOCODE: estimate OLS adding net migration control.
-
-# Add lagged outcome to control for pre-existing economic level.
-model5_54 <- lm(`2023` ~ eras_tour_host + Less_than_HS_Share + HS_Only_Share + Some_College_Share + Bachelors_or_Higher_Share + PCTPOVALL_2021 + NET_MIG_2023 + `2022`, data = reg_naics_54)
-# PSEUDOCODE: estimate OLS adding lagged 2022 outcome.
-
-# 4. Generate the regression table with stargazer
-# Export NAICS 54 model outputs into a single formatted regression table.
-stargazer(model1_54, model2_54, model3_54, model4_54, model5_54,
-          type = "text",
-          title = "Regression Results: NAICS 54 - Professional, Scientific, and Technical Services",
-          dep.var.labels = "Log GDP Per Capita (2023)",
-          covariate.labels = c("Eras Tour Host", "Less than HS Share", "HS Only Share",
-                               "Some College Share", "Bachelors or Higher Share",
-                               "Poverty Rate (2021)", "Net Migration (2023)", "Log GDP Per Capita (2022)"),
-          digits = 4,
-          out = "regression_table_naics_54.html")
-# PSEUDOCODE: export NAICS 54 regression models into one HTML table.
-
-
-# --------------------------------------------------------------------------------------
-# Section 3.7.4 - Regression Analysis: Industries Least Likely to Be Impacted (NAICS 11)
-# --------------------------------------------------------------------------------------
-
-# 1. Filter the dataset to only include NAICS 11
-
-# Keep only NAICS 11 rows for the fourth regression set.
-reg_naics_11 <- working_data %>%
-  filter(IndustryClassification == "11")
-# PSEUDOCODE: subset analysis data to NAICS 11 for regressions.
-
-# 2. Prepare population characteristics and relevant variables
-
-# Add the same standardized education-share controls for comparability.
-reg_naics_11 <- reg_naics_11 %>%
-  mutate(
-    Less_than_HS_Share = (`Less than a high school diploma, 2018-22` / POP_ESTIMATE_2023) * 100,
-    HS_Only_Share = (`High school diploma only, 2018-22` / POP_ESTIMATE_2023) * 100,
-    Some_College_Share = (`Some college or associate's degree, 2018-22` / POP_ESTIMATE_2023) * 100,
-    Bachelors_or_Higher_Share = (`Bachelor's degree or higher, 2018-22` / POP_ESTIMATE_2023) * 100
-  )
-# PSEUDOCODE: add education-share controls to NAICS 11 dataset.
-
-# 3. Define regression models with progressively added controls
-
-# Baseline specification with treatment indicator only.
-model1_11 <- lm(`2023` ~ eras_tour_host, data = reg_naics_11)
-# PSEUDOCODE: estimate baseline OLS with host indicator only.
-
-# Add education controls to reduce compositional confounding.
-model2_11 <- lm(`2023` ~ eras_tour_host + Less_than_HS_Share + HS_Only_Share + Some_College_Share + Bachelors_or_Higher_Share, data = reg_naics_11)
-# PSEUDOCODE: estimate OLS adding education controls.
-
-# Add county poverty rate control.
-model3_11 <- lm(`2023` ~ eras_tour_host + Less_than_HS_Share + HS_Only_Share + Some_College_Share + Bachelors_or_Higher_Share + PCTPOVALL_2021, data = reg_naics_11)
-# PSEUDOCODE: estimate OLS adding poverty control.
-
-# Add net migration to account for recent county inflow/outflow dynamics.
-model4_11 <- lm(`2023` ~ eras_tour_host + Less_than_HS_Share + HS_Only_Share + Some_College_Share + Bachelors_or_Higher_Share + PCTPOVALL_2021 + NET_MIG_2023, data = reg_naics_11)
-# PSEUDOCODE: estimate OLS adding net migration control.
-
-# Add lagged outcome to control for pre-existing economic level.
-model5_11 <- lm(`2023` ~ eras_tour_host + Less_than_HS_Share + HS_Only_Share + Some_College_Share + Bachelors_or_Higher_Share + PCTPOVALL_2021 + NET_MIG_2023 + `2022`, data = reg_naics_11)
-# PSEUDOCODE: estimate OLS adding lagged 2022 outcome.
-
-# 4. Generate the regression table with stargazer
-
-# Export NAICS 11 model outputs into a single formatted regression table.
-stargazer(model1_11, model2_11, model3_11, model4_11, model5_11,
-          type = "text",
-          title = "Regression Results: NAICS 11 - Agriculture, Forestry, Fishing, and Hunting",
-          dep.var.labels = "Log GDP Per Capita (2023)",
-          covariate.labels = c("Eras Tour Host", "Less than HS Share", "HS Only Share",
-                               "Some College Share", "Bachelors or Higher Share",
-                               "Poverty Rate (2021)", "Net Migration (2023)", "Log GDP Per Capita (2022)"),
-          digits = 4,
-          out = "regression_table_naics_11.html")
-# PSEUDOCODE: export NAICS 11 regression models into one HTML table.
+model1_11 <- industry_regression_results[["11"]]$models$model1
+model2_11 <- industry_regression_results[["11"]]$models$model2
+model3_11 <- industry_regression_results[["11"]]$models$model3
+model4_11 <- industry_regression_results[["11"]]$models$model4
+model5_11 <- industry_regression_results[["11"]]$models$model5
+# PSEUDOCODE: map loop outputs to legacy object names required by later sections.
 
 
 # ------------------------------------------------------
